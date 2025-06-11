@@ -1,57 +1,57 @@
 import { useState, useEffect } from "react";
 
-// Custom hook for fetching data
+// 🔁 Custom hook to fetch data from any API function
+// <T> = Type of the data you expect (e.g., list of movies, movie details, etc.)
 const useFetch = <T>(fetchFunction: () => Promise<T>, autoFetch = true) => {
-  // State for storing fetched data (null initially)
+  // 📦 Data from API will be stored here (initially null)
   const [data, setData] = useState<T | null>(null);
-  // State for loading status
+
+  // 🔄 True while data is loading
   const [loading, setLoading] = useState(false);
-  // State for error handling
+
+  // ⚠️ Error info if something goes wrong
   const [error, setError] = useState<Error | null>(null);
 
-  // Function to perform the actual data fetching
+  // 📲 Function to actually fetch the data
   const fetchData = async () => {
     try {
-      setLoading(true);        // Start loading
-      setError(null);         // Clear previous errors
+      setLoading(true); // Start loading
+      setError(null);   // Clear any old errors
 
-      const result = await fetchFunction();  // Execute provided fetch function
-      setData(result);        // Store successful result
+      const result = await fetchFunction(); // Call your fetch function
+      setData(result); // Save the result in state
     } catch (err) {
-      // Handle errors (convert to Error object if not already)
+      // If something goes wrong, store the error
       setError(
         err instanceof Error ? err : new Error("An unknown error occurred")
       );
     } finally {
-      setLoading(false);     // Stop loading regardless of success/error
+      setLoading(false); // Whether success or fail, stop loading
     }
   };
 
-  // Function to reset all states to initial values
+  // 🧹 Function to clear all states (start fresh)
   const reset = () => {
     setData(null);
     setError(null);
     setLoading(false);
   };
 
-  // Automatically fetch on component mount when autoFetch is true
+  // 🚀 Auto-fetch when the component mounts (if autoFetch is true)
   useEffect(() => {
     if (autoFetch) {
       fetchData();
     }
-  }, []);  // Empty dependency array = runs only on first render
+  }, []); // Empty array = run only once when the component is first loaded
 
-  // Return state values and control functions
-  return { 
-    data,      // Fetched data (T | null)
-    loading,   // Loading status (boolean)
-    error,     // Error object (Error | null)
-    refetch: fetchData,  // Function to re-fetch data manually
-    reset      // Function to reset all states
+  // 🧑‍💻 Return all important stuff for the component to use
+  return {
+    data,         // Data returned from fetch (or null)
+    loading,      // Whether it's currently loading
+    error,        // Any error that occurred (or null)
+    refetch: fetchData, // Function to call fetch again
+    reset         // Reset everything
   };
 };
 
 export default useFetch;
-
-// Generics Support (<T>)
-// Works with any data type you want to fetch

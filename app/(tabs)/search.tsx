@@ -6,6 +6,7 @@ import { images } from "@/constants/images";
 import React, { useEffect , useState} from "react";
 
 import SearchBar from "@/components/SearchBar";
+import { updateSearchCount } from "@/services/appwrite";
 
 import useFetch from "@/services/useFetch";
 import { fetchMovies } from "@/services/api";
@@ -25,16 +26,23 @@ const search = () => {
     reset,
   } = useFetch(() => fetchMovies({ query: searchQuery }),false);
 
- useEffect(() => {
-  const timeoutId = setTimeout( async () => {
-    if (searchQuery) {
-      await loadMovies();
-    } else {
-      reset();
-    }
-  },500);
-  return () => clearTimeout(timeoutId);
-}, [searchQuery]);
+ // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(async () => {
+      if (searchQuery.trim()) {
+        await loadMovies();
+
+        // Call updateSearchCount only if there are results
+        if (movies?.length! > 0 && movies?.[0]) {
+          await updateSearchCount(searchQuery, movies[0]);
+        }
+      } else {
+        reset();
+      }
+    }, 800);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
   
 
 
