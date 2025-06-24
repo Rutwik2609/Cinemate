@@ -27,22 +27,24 @@ const search = () => {
   } = useFetch(() => fetchMovies({ query: searchQuery }),false);
 
  // Debounced search effect
-  useEffect(() => {
-    const timeoutId = setTimeout(async () => {
-      if (searchQuery.trim()) {
-        await loadMovies();
+useEffect(() => {
+  const timeoutId = setTimeout(() => {
+    if (searchQuery.trim()) {
+      loadMovies();
+    } else {
+      reset();
+    }
+  }, 700);
 
-        // Call updateSearchCount only if there are results
-        if (movies?.length! > 0 && movies?.[0]) {
-          await updateSearchCount(searchQuery, movies[0]);
-        }
-      } else {
-        reset();
-      }
-    }, 800);
+  return () => clearTimeout(timeoutId);
+}, [searchQuery]);
 
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+useEffect(() => {
+  if (searchQuery.trim() && movies?.length > 0) {
+    updateSearchCount(searchQuery.trim(), movies[0]);
+  }
+}, [movies]);
+
   
 
 
@@ -70,7 +72,7 @@ const search = () => {
         }}
         ListHeaderComponent={
           <>
-            <View className="w-full flex-row justify-center mt-20 items-center">
+            <View className="w-full flex-row justify-center mt-10 items-center">
               <Image source={icons.logo} className="w-12 h-10" />
             </View>
 
